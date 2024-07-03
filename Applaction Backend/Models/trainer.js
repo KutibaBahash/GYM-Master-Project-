@@ -15,6 +15,7 @@ const trainerSchema = new mongoose.Schema({
   hight: Number,
   Weght: Number,
   status:Boolean,
+  traineesArray:Array,
 
 });
 
