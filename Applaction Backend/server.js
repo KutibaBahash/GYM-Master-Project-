@@ -6,6 +6,9 @@ const userRoutes = require("./Routes/userRoutes");
 const trainerRoutes = require("./Routes/trainerRoutes");
 const workoutRoutes = require("./Routes/workoutRoutes");
 const messageRoutes = require("./Routes/messageRoutes"); 
+const gymManagerRoutes = require("./Routes/gymManagerRoutes");
+
+
 
 require("dotenv").config(); // Load environment variables from .env file
 
@@ -16,6 +19,9 @@ app.use("/user", userRoutes); // regular user
 app.use("/trainer", trainerRoutes); // regular user 
 app.use("/workout", workoutRoutes); // workout routes
 app.use("/message", messageRoutes); // message routes
+app.use("/gym-manager", gymManagerRoutes); // gym manager routes
+
+
 
 const PORT =  3000;
 console.log(PORT);
