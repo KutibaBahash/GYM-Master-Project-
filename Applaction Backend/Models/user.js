@@ -11,7 +11,6 @@ const userSchema = new mongoose.Schema({
   joining_date: Date,
   payment:Number,
   trainer: String,
-  age: Number,
   hight: Number,
   Weght: Number,
   status:Boolean,
