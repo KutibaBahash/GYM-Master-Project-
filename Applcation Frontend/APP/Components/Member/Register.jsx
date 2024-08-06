@@ -60,7 +60,7 @@ const MemberRegister = ({ navigation }) => {
         last_name,
         phone_number,
         email,
-        encrypted_password: password, // שינוי שם משתנה לפי הסכימה
+        password, // שינוי שם משתנה לפי הסכימה
         birth_date,
         joining_date,
         payment,
