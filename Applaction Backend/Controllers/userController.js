@@ -138,29 +138,3 @@ exports.getUserByIdNumber = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch user' });
   }
 };
-
-exports.resetPassword = async (req, res) => {
-  try {
-    const { email, reset_code, new_password } = req.body;
-
-    // חיפוש המשתמש על פי האימייל וקוד האיפוס
-    const user = await User.findOne({ email, verificationCode: reset_code });
-    if (!user) {
-      return res.status(400).json({ error: 'Invalid reset code or email' });
-    }
-
-    // הצפנת הסיסמה החדשה
-    const hashedPassword = await bcrypt.hash(new_password, 10);
-
-    // עדכון הסיסמה החדשה ואיפוס קוד האיפוס
-    user.encrypted_password = hashedPassword;
-    user.verificationCode = null; // איפוס קוד האיפוס לאחר השימוש
-
-    await user.save();
-
-    res.status(200).json({ success: true, message: 'Password reset successful' });
-  } catch (error) {
-    console.error('Reset password failed:', error);
-    res.status(500).json({ error: 'Password reset failed' });
-  }
-};
