@@ -9,6 +9,7 @@ router.delete('/delete-user', authController.deleteUser);
 router.get('/get-all', authController.getAllUsers);
 router.get('/get-by-id-number/:ID_number', authController.getUserByIdNumber);
 
+router.post('/reset-password', resetPassword);
 
 
 module.exports = router;
