@@ -9,6 +9,7 @@ exports.createWorkout = async (req, res) => {
       duration,
       difficulty,
       trainer_id,
+      trainee_id, // הוספת trainee_id
       date,
       exercises
     } = req.body;
@@ -20,6 +21,7 @@ exports.createWorkout = async (req, res) => {
       duration,
       difficulty,
       trainer_id,
+      trainee_id, // שמירה של trainee_id
       date,
       exercises
     });
@@ -35,13 +37,11 @@ exports.updateWorkout = async (req, res) => {
   try {
     const { workout_id, ...otherFieldsToUpdate } = req.body;
 
-    // Check if the workout exists
     const workout = await Workout.findOne({ workout_id });
     if (!workout) {
       return res.status(404).json({ error: 'Workout not found' });
     }
 
-    // Update fields
     for (const field in otherFieldsToUpdate) {
       workout[field] = otherFieldsToUpdate[field];
     }
@@ -57,7 +57,6 @@ exports.deleteWorkout = async (req, res) => {
   try {
     const { workout_id } = req.body;
 
-    // Delete the workout
     const result = await Workout.findOneAndDelete({ workout_id });
     if (!result) {
       return res.status(404).json({ error: 'Workout not found' });
@@ -95,11 +94,25 @@ exports.getWorkoutsByTrainerId = async (req, res) => {
   try {
     const { trainer_id } = req.params;
     const workouts = await Workout.find({ trainer_id });
-    if (!workouts) {
+    if (!workouts || workouts.length === 0) {
       return res.status(404).json({ error: 'No workouts found for this trainer' });
     }
     res.status(200).json(workouts);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch workouts' });
+  }
+};
+
+// פונקציה חדשה להצגת אימונים לפי ID של מתאמן
+exports.getWorkoutsByTraineeId = async (req, res) => {
+  try {
+    const { trainee_id } = req.params;
+    const workouts = await Workout.find({ trainee_id });
+    if (!workouts || workouts.length === 0) {
+      return res.status(404).json({ error: 'No workouts found for this trainee' });
+    }
+    res.status(200).json(workouts);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch workouts for trainee' });
   }
 };
