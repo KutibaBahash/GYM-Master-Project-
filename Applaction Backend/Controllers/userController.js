@@ -141,10 +141,10 @@
 // New function to get users with trainer verification code
 exports.getUsersByTrainerVerificationCode = async (req, res) => {
   try {
-    const { verificationCode } = req.params;
-    console.log('Received verification code:', verificationCode); // Log the incoming code
+    const { verfcationCode } = req.params;
+    console.log('Received verification code:', verfcationCode); // Log the incoming code
 
-    const users = await User.find({ verificationCode });
+    const users = await User.find({ verfcationCode });
     console.log('Users found:', users); // Log the users found, if any
 
     if (!users || users.length === 0) {
