@@ -1,140 +1,153 @@
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const User = require('../Models/user'); // Correct import
-require('dotenv').config();
+  const bcrypt = require('bcrypt');
+  const jwt = require('jsonwebtoken');
+  const User = require('../Models/user'); // Correct import
+  require('dotenv').config();
 
-exports.register = async (req, res) => {
-      try {
-            const {
-              ID_number,
-              first_name,
-              last_name,
-              phone_number,
-              email,
-              password,
-              birth_date,
-              joining_date,
-              payment,
-              trainer,
-              height,
-              weight,
-              status,
-              verificationCode
-            } = req.body;
-        
+  exports.register = async (req, res) => {
+        try {
+              const {
+                ID_number,
+                first_name,
+                last_name,
+                phone_number,
+                email,
+                password,
+                birth_date,
+                joining_date,
+                payment,
+                trainer,
+                height,
+                weight,
+                status,
+                verificationCode
+              } = req.body;
+          
 
-    const existingUser = await User.findOne({ email });
+      const existingUser = await User.findOne({ email });
 
-    if (existingUser) {
-      return res.status(400).json({ error: 'User with this email already exists' });
+      if (existingUser) {
+        return res.status(400).json({ error: 'User with this email already exists' });
+      }
+
+      const encryptedPassword = await bcrypt.hash(password, 10);
+
+      const newUser = new User({
+        ID_number,
+        first_name,
+        last_name,
+        phone_number,
+        email,
+        encrypted_password: encryptedPassword,
+        birth_date,
+        joining_date,
+        payment,
+        trainer,
+        height,
+        weight,
+        status,
+        verificationCode
+      });
+
+      await newUser.save();
+      res.status(201).json({ message: 'User registered successfully' });
+    } catch (error) {
+      res.status(500).json({ error: 'Registration failed'+console.log(error) });
     }
+  };
 
-    const encryptedPassword = await bcrypt.hash(password, 10);
+  exports.login = async (req, res) => {
+    try {
+      const user = await User.findOne({ email: req.body.email });
+      if (!user) {
+        return res.status(401).json({ error: 'Authentication failed' });
+      }
 
-    const newUser = new User({
-      ID_number,
-      first_name,
-      last_name,
-      phone_number,
-      email,
-      encrypted_password: encryptedPassword,
-      birth_date,
-      joining_date,
-      payment,
-      trainer,
-      height,
-      weight,
-      status,
-      verificationCode
-    });
+      const validPassword = await bcrypt.compare(
+        req.body.password,
+        user.encrypted_password
+      );
 
-    await newUser.save();
-    res.status(201).json({ message: 'User registered successfully' });
-  } catch (error) {
-    res.status(500).json({ error: 'Registration failed'+console.log(error) });
-  }
-};
+      if (!validPassword) {
+        return res.status(401).json({ error: 'Authentication failed' });
+      }
+      res.status(200).json({ user }); // Include only the user data in the response
+    } catch (error) {
+      res.status(500).json({ error: 'Login failed' });
+    }
+  };
 
-exports.login = async (req, res) => {
+  exports.updateUserProfile = async (req, res) => {
+    try {
+      const { email, password, ...otherFieldsToUpdate } = req.body;
+
+      // Check if the user exists
+      const user = await User.findOne({ email });
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      // Update fields
+      if (password) {
+        user.encrypted_password = await bcrypt.hash(password, 10);
+      }
+      for (const field in otherFieldsToUpdate) {
+        user[field] = otherFieldsToUpdate[field];
+      }
+
+      await user.save();
+      res.status(200).json({ message: 'User profile updated successfully' });
+    } catch (error) {
+      res.status(500).json({ error: 'User profile update failed' });
+    }
+  };
+
+  exports.deleteUser = async (req, res) => {
+    try {
+      const { email } = req.body;
+
+      // Delete the user
+      const result = await User.findOneAndDelete({ email });
+      if (!result) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      res.status(200).json({ message: 'User deleted successfully' });
+    } catch (error) {
+      res.status(500).json({ error: 'User deletion failed' });
+    }
+  };
+
+  exports.getAllUsers = async (req, res) => {
+    try {
+      const users = await User.find();
+      res.status(200).json(users);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch users' });
+    }
+  };
+
+  exports.getUserByIdNumber = async (req, res) => {
+    try {
+      const { ID_number } = req.params;
+      const user = await User.findOne({ ID_number });
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      res.status(200).json(user);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch user' });
+    }
+  };
+// New function to get users with trainer verification code
+exports.getUsersByTrainerVerificationCode = async (req, res) => {
   try {
-    const user = await User.findOne({ email: req.body.email });
-    if (!user) {
-      return res.status(401).json({ error: 'Authentication failed' });
+    const { verificationCode } = req.params; // Assuming verification code is passed as a URL parameter
+    const users = await User.find({ verificationCode, trainer: { $ne: null } }); // Find users with a specific verification code and who are trainers
+    if (users.length === 0) {
+      return res.status(404).json({ error: 'No users with the specified trainer verification code found' });
     }
-
-    const validPassword = await bcrypt.compare(
-      req.body.password,
-      user.encrypted_password
-    );
-
-    if (!validPassword) {
-      return res.status(401).json({ error: 'Authentication failed' });
-    }
-    res.status(200).json({ user }); // Include only the user data in the response
-  } catch (error) {
-    res.status(500).json({ error: 'Login failed' });
-  }
-};
-
-exports.updateUserProfile = async (req, res) => {
-  try {
-    const { email, password, ...otherFieldsToUpdate } = req.body;
-
-    // Check if the user exists
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    // Update fields
-    if (password) {
-      user.encrypted_password = await bcrypt.hash(password, 10);
-    }
-    for (const field in otherFieldsToUpdate) {
-      user[field] = otherFieldsToUpdate[field];
-    }
-
-    await user.save();
-    res.status(200).json({ message: 'User profile updated successfully' });
-  } catch (error) {
-    res.status(500).json({ error: 'User profile update failed' });
-  }
-};
-
-exports.deleteUser = async (req, res) => {
-  try {
-    const { email } = req.body;
-
-    // Delete the user
-    const result = await User.findOneAndDelete({ email });
-    if (!result) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    res.status(200).json({ message: 'User deleted successfully' });
-  } catch (error) {
-    res.status(500).json({ error: 'User deletion failed' });
-  }
-};
-
-exports.getAllUsers = async (req, res) => {
-  try {
-    const users = await User.find();
     res.status(200).json(users);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch users' });
-  }
-};
-
-exports.getUserByIdNumber = async (req, res) => {
-  try {
-    const { ID_number } = req.params;
-    const user = await User.findOne({ ID_number });
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-    res.status(200).json(user);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch user' });
+    res.status(500).json({ error: 'Failed to fetch users with trainer verification code' });
   }
 };
