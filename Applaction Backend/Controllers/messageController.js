@@ -119,6 +119,26 @@ exports.getMessagesForRecipient = async (req, res) => {
 };
 
 
+
+
+
+// Retrieve all messages for a specific recipient by ID
+exports.getMessagesForRecipientById = async (req, res) => {
+  try {
+    const { recipientId } = req.params;
+    const messages = await Message.find({ receiver_ID_number: recipientId });
+
+    if (!messages || messages.length === 0) {
+      return res.status(404).json({ error: 'No messages found for the recipient' });
+    }
+
+    res.status(200).json(messages);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch messages for the recipient' });
+  }
+};
+
+
 exports.getMessagesBySender = async (req, res) => {
       try {
         const { senderEmail } = req.params;
@@ -165,7 +185,7 @@ const saveMessage = async (recipientEmail, message) => {
         const { message } = req.body; // Extract the message from the request body
     
         // Fetch users from the external API
-        const response = await axios.get('https://besmart-wms.onrender.com/auth/get-all');
+        const response = await axios.get('https://besmart-wms.onrender.com/user/get-all');
         const users = response.data;
     
         // Iterate through the users and save a message for each user

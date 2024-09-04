@@ -12,4 +12,7 @@ router.get('/recipient/:recipientEmail', messageController.getMessagesForRecipie
 router.get('/sender/:senderEmail', messageController.getMessagesBySender);
 router.post('/send-emails-and-create-messages', messageController.sendEmailsAndCreateMessages);
 
+
+router.get('/recipient/:recipientId', messageController.getMessagesForRecipientById);
+
 module.exports = router;
