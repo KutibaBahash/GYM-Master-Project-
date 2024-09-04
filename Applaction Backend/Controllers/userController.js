@@ -141,14 +141,14 @@
 // New function to get users with trainer verification code
 exports.getUsersByTrainerVerificationCode = async (req, res) => {
   try {
-    const { verfcationCode } = req.params;
-    console.log('Received verification code:', verfcationCode); // Log the incoming code
+    const { verificationCode } = req.params;
+    console.log('Received verification code:', verificationCode); // Log received verification code
 
-    const users = await User.find({ verfcationCode });
-    console.log('Users found:', users); // Log the users found, if any
+    // Fetch users with the specific verification code
+    const users = await User.find({ verfcationCode: verificationCode });
+    console.log('Users matching verification code:', users); // Log matched users
 
     if (!users || users.length === 0) {
-      console.log('No trainees found for the given verification code.');
       return res.status(404).json({ error: 'No trainees found for this verification code.' });
     }
 
