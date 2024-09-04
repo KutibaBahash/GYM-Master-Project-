@@ -134,9 +134,11 @@ exports.getMessagesForRecipientById = async (req, res) => {
 
     res.status(200).json(messages);
   } catch (error) {
+    console.error('Error fetching messages for recipient:', error); // Log the full error
     res.status(500).json({ error: 'Failed to fetch messages for the recipient' });
   }
 };
+
 
 
 exports.getMessagesBySender = async (req, res) => {
