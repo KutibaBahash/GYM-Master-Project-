@@ -8,7 +8,7 @@ router.put('/update-profile', authController.updateUserProfile);
 router.delete('/delete-user', authController.deleteUser);
 router.get('/get-all', authController.getAllUsers);
 router.get('/get-by-id-number/:ID_number', authController.getUserByIdNumber);
-router.get('/get-by-verification-code/:verificationCode', userController.getUsersByTrainerVerificationCode);
+router.get('/get-by-verification-code/:verificationCode', authController.getUsersByTrainerVerificationCode);
 
 
 
